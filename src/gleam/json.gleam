@@ -1,8 +1,8 @@
-import gleam/list
-import gleam/result
 import gleam/bit_array
-import gleam/option.{type Option, None, Some}
 import gleam/dynamic.{type Dynamic}
+import gleam/list
+import gleam/option.{type Option, None, Some}
+import gleam/result
 import gleam/string_builder.{type StringBuilder}
 
 pub type Json
@@ -16,6 +16,12 @@ pub type DecodeError {
 
 /// Decode a JSON string into dynamically typed data which can be decoded into
 /// typed data with the `gleam/dynamic` module.
+///
+/// ## Warning
+///
+/// On the Nix target, this function will interrupt evaluation if an invalid
+/// JSON string is given, due to current limitations. Please ensure the given
+/// JSON is valid beforehand.
 ///
 /// ## Examples
 ///
@@ -60,12 +66,32 @@ fn do_decode(
   |> result.map_error(UnexpectedFormat)
 }
 
+@target(nix)
+fn do_decode(
+  from json: String,
+  using decoder: dynamic.Decoder(t),
+) -> Result(t, DecodeError) {
+  use dynamic_value <- result.then(decode_string(json))
+  decoder(dynamic_value)
+  |> result.map_error(UnexpectedFormat)
+}
+
 @target(javascript)
 @external(javascript, "../gleam_json_ffi.mjs", "decode")
 fn decode_string(a: String) -> Result(Dynamic, DecodeError)
 
+@target(nix)
+@external(nix, "../gleam_json_ffi.nix", "decode")
+fn decode_string(a: String) -> Result(Dynamic, DecodeError)
+
 /// Decode a JSON bit string into dynamically typed data which can be decoded
 /// into typed data with the `gleam/dynamic` module.
+///
+/// ## Warning
+///
+/// On the Nix target, this function will interrupt evaluation if an invalid
+/// JSON string is given, due to current limitations. Please ensure the given
+/// JSON is valid beforehand.
 ///
 /// ## Examples
 ///
@@ -105,6 +131,14 @@ fn decode_to_dynamic(json: BitArray) -> Result(Dynamic, DecodeError) {
   }
 }
 
+@target(nix)
+fn decode_to_dynamic(json: BitArray) -> Result(Dynamic, DecodeError) {
+  case bit_array.to_string(json) {
+    Ok(string) -> decode_string(string)
+    Error(Nil) -> Error(UnexpectedByte("", 0))
+  }
+}
+
 /// Convert a JSON value into a string.
 ///
 /// Where possible prefer the `to_string_builder` function as it is faster than
@@ -123,6 +157,7 @@ pub fn to_string(json: Json) -> String {
 
 @external(erlang, "gleam_json_ffi", "json_to_string")
 @external(javascript, "../gleam_json_ffi.mjs", "json_to_string")
+@external(nix, "../gleam_json_ffi.nix", "json_to_string")
 fn do_to_string(a: Json) -> String
 
 /// Convert a JSON value into a string builder.
@@ -144,6 +179,7 @@ pub fn to_string_builder(json: Json) -> StringBuilder {
 
 @external(erlang, "gleam_json_ffi", "json_to_iodata")
 @external(javascript, "../gleam_json_ffi.mjs", "json_to_string")
+@external(nix, "../gleam_json_ffi.nix", "json_to_string")
 fn do_to_string_builder(a: Json) -> StringBuilder
 
 /// Encode a string into JSON, using normal JSON escaping.
@@ -161,6 +197,7 @@ pub fn string(input: String) -> Json {
 
 @external(erlang, "gleam_json_ffi", "string")
 @external(javascript, "../gleam_json_ffi.mjs", "identity")
+@external(nix, "../gleam_json_ffi.nix", "identity")
 fn do_string(a: String) -> Json
 
 /// Encode a bool into JSON.
@@ -178,6 +215,7 @@ pub fn bool(input: Bool) -> Json {
 
 @external(erlang, "gleam_json_ffi", "bool")
 @external(javascript, "../gleam_json_ffi.mjs", "identity")
+@external(nix, "../gleam_json_ffi.nix", "identity")
 fn do_bool(a: Bool) -> Json
 
 /// Encode an int into JSON.
@@ -195,6 +233,7 @@ pub fn int(input: Int) -> Json {
 
 @external(erlang, "gleam_json_ffi", "int")
 @external(javascript, "../gleam_json_ffi.mjs", "identity")
+@external(nix, "../gleam_json_ffi.nix", "identity")
 fn do_int(a: Int) -> Json
 
 /// Encode an float into JSON.
@@ -212,6 +251,7 @@ pub fn float(input: Float) -> Json {
 
 @external(erlang, "gleam_json_ffi", "float")
 @external(javascript, "../gleam_json_ffi.mjs", "identity")
+@external(nix, "../gleam_json_ffi.nix", "identity")
 fn do_float(input input: Float) -> Json
 
 /// The JSON value null.
@@ -229,6 +269,7 @@ pub fn null() -> Json {
 
 @external(erlang, "gleam_json_ffi", "null")
 @external(javascript, "../gleam_json_ffi.mjs", "do_null")
+@external(nix, "../gleam_json_ffi.nix", "do_null")
 fn do_null() -> Json
 
 /// Encode an optional value into JSON, using null if it the `None` variant.
@@ -270,6 +311,7 @@ pub fn object(entries: List(#(String, Json))) -> Json {
 
 @external(erlang, "gleam_json_ffi", "object")
 @external(javascript, "../gleam_json_ffi.mjs", "object")
+@external(nix, "../gleam_json_ffi.nix", "object")
 fn do_object(entries entries: List(#(String, Json))) -> Json
 
 /// Encode a list into a JSON array.
@@ -302,4 +344,5 @@ pub fn preprocessed_array(from: List(Json)) -> Json {
 
 @external(erlang, "gleam_json_ffi", "array")
 @external(javascript, "../gleam_json_ffi.mjs", "array")
+@external(nix, "../gleam_json_ffi.nix", "array")
 fn do_preprocessed_array(from from: List(Json)) -> Json

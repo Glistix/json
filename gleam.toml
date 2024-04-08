@@ -12,8 +12,8 @@ links = [
 ]
 
 [dependencies]
-gleam_stdlib = "~> 0.19 or ~> 1.0"
+gleam_stdlib = { path = "../gleam_stdlib" }
 thoas = "~> 0.2"
 
 [dev-dependencies]
-gleeunit = "~> 1.0"
+gleeunit = { path = "../gleeunit" }

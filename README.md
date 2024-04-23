@@ -1,17 +1,15 @@
 # json 🐑
 
-Work with JSON in Gleam!
+**Mirrors:** [**GitHub**](https://github.com/glistix/json) | [**Codeberg**](https://codeberg.org/glistix/json)
 
-Under the hood library uses [Thoas](https://github.com/lpil/thoas/), the fastest
-and most memory efficient pure Erlang JSON encoder/decoder.
+This is a fork of [`gleam_json`](https://github.com/gleam-lang/json) which **adds support for Glistix's Nix target.**
 
 ## Installation
 
-Add this package to your Gleam project.
+Currently, this package must be used as a **local dependency to a Git submodule.**
+This ensures transitive dependencies on `gleam_json` will also use the patch.
 
-```shell
-gleam add gleam_json
-```
+For instructions, see [the Glistix handbook](https://glistix.github.io/book/recipes/overriding-packages.html).
 
 ### Encoding
 

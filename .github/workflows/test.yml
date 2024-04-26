@@ -3,6 +3,7 @@ name: test
 on:
   push:
     branches:
+      - master
       - main
   pull_request:
 
@@ -10,13 +11,18 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: erlef/setup-beam@v1
+      - uses: actions/checkout@v4
         with:
-          otp-version: "25.1"
-          elixir-version: "1.13.1"
-          gleam-version: "0.34.0"
-          rebar3-version: "3"
-      - run: gleam test
-      - run: gleam test --target javascript
-      - run: gleam format --check src test
+          submodules: 'recursive'
+      - uses: cachix/install-nix-action@v26
+      - uses: DeterminateSystems/magic-nix-cache-action@v4
+      - name: Ensure flake.lock was committed
+        run: ls flake.lock
+      - run: nix flake check -L
+      - run: nix build -L
+      - run: glistix deps download
+        shell: nix develop --command bash -e {0}
+      - run: glistix test --target nix
+        shell: nix develop --command bash -e {0}
+      - run: glistix format --check src test
+        shell: nix develop --command bash -e {0}

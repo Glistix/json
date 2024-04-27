@@ -9,7 +9,7 @@ This is a fork of [`gleam_json`](https://github.com/gleam-lang/json) which **add
 Currently, this package must be used as a **local dependency to a Git submodule.**
 This ensures transitive dependencies on `gleam_json` will also use the patch.
 
-For instructions, see [the Glistix handbook](https://glistix.github.io/book/recipes/overriding-packages.html).
+For instructions, please see [the Glistix handbook](https://glistix.github.io/book/recipes/overriding-packages.html).
 
 ### Encoding
 

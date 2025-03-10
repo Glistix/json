@@ -1,4 +1,4 @@
-name = "gleam_json"
+name = "glistix_json"
 version = "1.0.0"
 gleam = ">= 0.32.0"
 

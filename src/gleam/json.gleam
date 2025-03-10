@@ -19,7 +19,7 @@ pub type DecodeError {
 ///
 /// ## Warning
 ///
-/// On the Nix target, this function will interrupt evaluation if an invalid
+/// On the Nix target, this function will crash Nix evaluation if an invalid
 /// JSON string is given, due to current limitations. Please ensure the given
 /// JSON is valid beforehand.
 ///

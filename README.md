@@ -2,22 +2,32 @@
 
 **Mirrors:** [**GitHub**](https://github.com/glistix/json) | [**Codeberg**](https://codeberg.org/glistix/json)
 
-This is a fork of [`gleam_json`](https://github.com/gleam-lang/json) which **adds support for Glistix's Nix target.**
+[![Nix-compatible](https://img.shields.io/badge/target-nix-5277C3)](https://github.com/glistix/glistix)
+
+Work with JSON in [Glistix](https://github.com/glistix/glistix)!
+
+This is a fork of [`gleam_json`](https://github.com/gleam-lang/json) which **adds support for Glistix's Nix target**.
 
 ## Incompatibilities
 
-Please note that, currently, **JSON decoding (the `decode` function) will crash when receiving invalid input on the Nix target**
-instead of returning an `Error`.
+Please note that, currently, **JSON decoding (the `decode` function) will crash when receiving invalid JSON input on the Nix target** instead of gracefully failing and returning an `Error`.
 
-This is because it uses `builtins.fromJSON` which aborts execution on invalid input. A fix for this would likely depend
-on changes to Nix itself.
+This is because it uses `builtins.fromJSON` which aborts execution on invalid input. A fix for this while retaining efficiency would likely depend on changes to Nix itself.
 
 ## Installation
 
-Currently, this package must be used as a **local dependency to a Git submodule.**
+You can use this fork by running `glistix add gleam_json` followed by adding the line below to your Glistix project's `gleam.toml` file (as of Glistix v0.7.0):
+
+```toml
+[glistix.preview.patch]
+# ... Existing patches ...
+# Add this line:
+gleam_json = { name = "glistix_json", version = ">= 1.0.0 and < 2.0.0" }
+```
+
 This ensures transitive dependencies on `gleam_json` will also use the patch.
 
-For instructions, please see [the Glistix handbook](https://glistix.github.io/book/recipes/overriding-packages.html).
+For the most recent instructions, please see [the Glistix handbook](https://glistix.github.io/book/recipes/overriding-packages.html).
 
 ### Encoding
 
@@ -44,7 +54,7 @@ JSON is decoded into a `Dynamic` value which can be decoded using the
 > [!WARNING]
 >
 > On the Nix target, invalid JSON input will cause a crash instead of
-> returning an `Error`. Ensure you always take valid JSON input.
+> returning an `Error`. Ensure you always provide valid JSON input.
 
 ```gleam
 import myapp.{Cat}
